@@ -18,13 +18,20 @@ While the programming language is R, tools based in other languages such as UNIX
 
 ## Bioinformatics workflows for common bench experiments that are well-documented:
 
+### General tools:
+
 * Analysis of flow-cytometry data using the [`flowCore` R/Bioconductor pakcage] (https://bioconductor.org/packages/release/bioc/html/flowCore.html)
-* Analysis of quantitative polymerase chain reaction (qPCR) in R: [qpcR](https://cran.r-project.org/web/packages/qpcR/index.html), [HTqPCR] (https://www.bioconductor.org/packages/release/bioc/html/HTqPCR.html), [EasyqPCR](https://www.bioconductor.org/packages/release/bioc/html/EasyqpcR.html)
-* Analysis of [dose response curve in R](https://cran.r-project.org/web/packages/drc/index.html)
+* Analysis of quantitative polymerase chain reaction (qPCR) in R: [qpcR] (https://cran.r-project.org/web/packages/qpcR/index.html), [HTqPCR] (https://www.bioconductor.org/packages/release/bioc/html/HTqPCR.html), [EasyqPCR] (https://www.bioconductor.org/packages/release/bioc/html/EasyqpcR.html)
+* Analysis of [dose response curve in R] (https://cran.r-project.org/web/packages/drc/index.html)
+
+### Specific computational tools:
+
+* [PAM50 gene list and sample R code by J.S. Parker (J Clin. Oncol. 2009; zipped folder)] (https://genome.unc.edu/pubsup/breastGEO/PAM50.zip)
 
 ## Other resources:
 
-* [Github pages](https://pages.github.com/)
+* [GitHub pages](https://pages.github.com/)
+* [Good coding styles (courtesy of M. Steinbaugh)] (http://steinbaugh.com/guides/programming_style)
 
 ## Coming soon:
 
