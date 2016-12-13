@@ -2,7 +2,7 @@
 # David Chen
 
 ## Installation
-brew install poppler
+brew install poppler ## make sure to have updated Xcode
 gem install pdfunite
 
 ## Verify installed software:
