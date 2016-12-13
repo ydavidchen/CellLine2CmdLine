@@ -1,0 +1,198 @@
+---
+title: "Visualization of Illumina HumanMethylationEPIC (850K) data using the Gviz R/Bioconductor package"
+author: "David Chen (github.com/ydavidchen)"
+date: "12/14/2016"
+output: html_document
+---
+
+## Introduction
+
+Gviz is an intricate tool for visualizing (epi) genomic annotation and data. In this tutorial, a DNA 5-methylcytosine (5mC) methylation levels from a subset of The Cancer Genome Atlas (TCGA) subjects will be used as the demo. The example data set can be found on (Github) [http://github.com/ydavidchen].
+
+## Workflow for visualizing DNA methylation datasets
+
+Subset the Illumina HumanMethylation annotation file to your favorite gene(s). This will minimize memory usage and the change for RStudio crashing. 
+
+For first time users, be sure to download the appropriate annotation package, depending on your methylation data:
+
+* (HumanMethylation450k annotation)[http://bioconductor.org/packages/release/data/annotation/html/IlluminaHumanMethylation450kanno.ilmn12.hg19.html]
+* (HumanMethylation850k (EPIC) annotation)[http://bioconductor.org/packages/release/data/annotation/html/IlluminaHumanMethylationEPICanno.ilm10b2.hg19.html]
+
+```{r Annotation, message=FALSE}
+## Speed up computation by using all minus 1 cores:
+library(doParallel); registerDoParallel(detectCores() - 1)
+
+## Load 850K annotation package:
+library(IlluminaHumanMethylationEPICanno.ilm10b2.hg19) 
+data(IlluminaHumanMethylationEPICanno.ilm10b2.hg19)
+annot.EPIC <- getAnnotation(IlluminaHumanMethylationEPICanno.ilm10b2.hg19)
+annot.EPIC <- as.data.frame(annot.EPIC@listData)
+
+## Subset CpGs in the promoter region of your favorite gene(s):
+CpGinfo <- data.frame(
+  cgID = annot.EPIC$Name,
+  GeneName = annot.EPIC$UCSC_RefGene_Name,
+  GenomicContext = annot.EPIC$UCSC_RefGene_Group,
+  TranscriptIsoforms = annot.EPIC$UCSC_RefGene_Accession
+)
+
+myFavoriteGene <- "TP53" #c("GENE1", "GENE2") if multiple
+CpGinfo <- CpGinfo[grep(myFavoriteGene, CpGinfo$GeneName, ignore.case=TRUE), ]
+
+## Select CpG IDs within TP53 based on genomic context:
+myCpGs <- droplevels(CpGinfo$cgID)
+```
+
+Load Infinium 850k example dataset that comes with the `ChAMP` package:
+
+```{r SimData, message=FALSE}
+library(ChAMP); data(EPICSimData)
+myLoad <- myLoad$beta
+head(myLoad)
+```
+
+When performing this procedure using your own data set, be sure to save a matrix of methylation beta values. This matrix can be exported from Illumina's GenomeStudio software. If you are working with Intensity Data Files (.idat) in R, you may use the function `getBeta` from the `minfi` package and then save your file using `write.table` or equivalent.
+
+Now, you are ready to visualize DNA methylation levels at the TP53 promoter region. 
+
+First, load packages. Then, convert your 850k annotation to a `GenomicRanges (GRanges)` object so that the `Gviz::DataTrack` function can read:
+
+```{r Setup, message=FALSE}
+## Load packages:
+library(Gviz); library(gdata)
+library(rtracklayer)
+
+## Define genome build:
+gen <- "hg19"
+
+## Select chromosome to reduce memory usage:
+chr <- "chr6" #chromosome where human TP53 resides
+
+## Create (subset) data.frame for making GRanges object for methylation array annotation track AND data tracks
+df.850k <- data.frame(
+  chr = annot.EPIC$chr,
+  start = as.numeric(annot.EPIC$pos),
+  end = as.numeric(annot.EPIC$pos),
+  cgID = annot.EPIC$Name,
+  UCSCgene = annot.EPIC$UCSC_RefGene_Name
+)
+rownames(df.850k) <- df.850k$cgID #for merging
+```
+
+We can then create a `Gviz::DataTrack` object, which we will use for plotting at the end:
+
+```{r DataTrack}
+## Create GRanges object using the subsetted 850k annotation:
+gr.myLoad <- merge(df.850k, myLoad, by="row.names")
+gr.myLoad <- makeGRangesFromDataFrame(gr.myLoad, keep.extra.columns=TRUE)
+
+## DataTrack object is created using the GRanges object:
+dTrack <- DataTrack(gr.myLoad,type=c("boxplot","a"), 
+                    genome=gen, chromosome=chr, 
+                    from=from, to=to, name="%methyl.")
+
+dTrack #preview track info
+```
+
+Download gene and chromosome annotations from the UCSC hg19 database:
+
+```{r UCSC, message=FALSE}
+mySession <- browserSession('UCSC')
+genome(mySession) <- gen
+query <- ucscTableQuery(mySession,track='refGene')
+tableName(query) <- "refGene"
+refseq <- getTable(query)
+
+## RECOMMENDED: Subset your tracks and tables as much as you can to save time and minimize RStudio crashing:
+refseq <- refseq[refseq$name2 == myFavoriteGene, ] #further subset
+TSS <- min(refseq$txStart)
+from <- TSS - 5000
+to <- max(refseq$cdsEnd) + 5000
+paste0(chr,":",from,"-",to) #can be searched on UCSC Genome Broswer
+```
+
+Create chromosome ideograms and genome axis:
+
+```{r chromTracks}
+ideoTrack <- IdeogramTrack(genome = gen, chromosome = chr, from = from, to = to)
+axTrack <- GenomeAxisTrack(genome = gen, chromosome = chr, from = from, to = to)
+```
+
+Create a gene-region track that represents the UCSC gene model:
+
+```{r GeneModel, message=FALSE}
+## Load annotation packages:
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+
+## Create gene-region tracks:
+GeneTrack <- UcscTrack(
+  genome = gen, chromosome = chr, track = "refGene",
+  trackType = "GeneRegionTrack",
+  from = from, to = to,
+  rstarts = "exonStarts",rends = "exonEnds", strand = "strand",
+  gene = "name", symbol = "name2", transcript = "name", 
+  transcriptAnnotation = 'symbol', #labels gene names on the final plot
+  stacking = "dense", #your options are: "full", "pack", & "dense" as in UCSC Genome Browser
+  fill = "salmon", col="salmon", name = "RefSeq Genes" #update based on your choice
+)
+```
+
+You may include additional tracks that represent (epi)genomic information. The syntax is identical to the gene-region track:
+
+```{r Additional, message=FALSE}
+cpgIslands <- UcscTrack(
+  genome = gen, chromosome = chr, track = "cpgIslandExt", 
+  from = from, to = to,
+  trackType = "AnnotationTrack", start = "chromStart",
+  end = "chromEnd", id = "name", shape = "box",
+  stacking="dense", 
+  fill="#006400", col="#006400", name="CpG Island"
+)
+```
+
+You are now ready to visulaize your tracks. The plan is to highlight just the promoter region of the gene, and then plot a window with features defined above with a highlighting box:
+
+```{r Plotting, message=FALSE}
+## Highlight a CpG-dense region upstream of TSS:
+ht <- HighlightTrack(
+  trackList = list(GeneTrack, cpgIslands, dTrack), 
+  genome = gen, chromosome = chr,
+  reverseStrand=F,
+  start = to-6000, end = to-3000,
+  fill="paleturquoise1", col="paleturquoise1" #track colors are of your choice
+)
+
+## Plot; note the syntax of HighlightTracks
+plotTracks(
+  c(ideoTrack, axTrack, ht),
+  genome = gen, chromosome = chr, reverseStrand=F,
+  from = from, to = to,
+  background.title = "black"
+)
+```
+
+You can zoom-in onto just the highlighted portion:
+
+```{r}
+plotTracks(
+  c(ideoTrack, axTrack, GeneTrack, cpgIslands, dTrack),
+  genome = gen, chromosome = chr, reverseStrand=F,
+  from = to-6000, to = to-3000,
+  background.title = "black"
+)
+```
+
+If you have generated a `Gviz` plots using the code above, congratulations! This is no easy task. As you may have noticed, delicate graphics in `Gviz` require intense computation. You may save your work space as an `.RData` file. This will save you time if you want to revisit your `Gviz` objects at a later time:
+
+```{r, message=FALSE, eval=FALSE}
+# (Optional) Save workspace for ease of loading:
+storagePath <- "" #path, such as the Downloads folder on Mac OS
+save(list = ls(), file = storagePath, envir=.GlobalEnv)
+```
+
+## References
+
+Hahne F and Ivanek R. Visualizing genomic data using Gviz and Bioconductor. Methods Mol. Biol. 1418: 335-351 (2016)
+
+Morris TJ, et al. ChAMP: 450k Chip Analysis Methylation Pipeline. Bioinfo. 30(3): 428-430 (2014).
