@@ -87,7 +87,7 @@ Use the genomation package to plot a heat matrix for the RRBS
 
 ```{r ScoreMatrices, message=FALSE}
 # source("https://bioconductor.org/biocLite.R")
-# biocLite(c("genomation"))
+# biocLite("genomation")
 library(genomation)
 
 ## Define colors:
@@ -102,8 +102,6 @@ mySMlist <- ScoreMatrixList(
   weight.col = "CommonCol",
   is.noCovNA = TRUE #REQUIRED for data without complete coverage, like methylation
 )
-
-par(mfrow=c(1,2))
 
 ## Heat matrix for RRBS data:
 heatMatrix(mySMlist[[1]], xcoords=c(-500, 500), xlab="Distance to transcription start (bp)", main = "chrX 5mC methylation by RRBS in CD3")
