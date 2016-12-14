@@ -81,6 +81,12 @@ library(TxDb.Hsapiens.UCSC.hg19.knownGene) #annotation package
 myPromoters <- promoters(TxDb.Hsapiens.UCSC.hg19.knownGene, upstream=500, downstream=500) #adjust as necessary
 ```
 
+**In case you are unable to download the data sets above, I've provided you with an R object with everything up to this point**
+
+```{r eval=FALSE}
+load("my-R-objects-for-genomation.RData") #objects so far
+```
+
 ## Genome-scale data visualization by genomation
 
 Use the genomation package to plot a heat matrix for the RRBS 
@@ -89,6 +95,7 @@ Use the genomation package to plot a heat matrix for the RRBS
 # source("https://bioconductor.org/biocLite.R")
 # biocLite("genomation")
 library(genomation)
+library(GenomicRanges)
 
 ## Define colors:
 # install.packages("RColorBrewer")

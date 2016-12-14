@@ -64,6 +64,7 @@
 # source("https://bioconductor.org/biocLite.R")
 # biocLite("genomation")
 library(genomation)
+library(GenomicRanges)
 load("my-R-objects-for-genomation.RData")
 
 ## Define colors:
