@@ -2,7 +2,7 @@
 # Cluster Usage: Generate R object for data visualization by genomation
 # Script author: David Chen (github.com/ydavidchen)
 # Notes:
-# 1a. On a test node loaded with , directy copy and paste the following code, 
+# 1a. On a test node, directy copy and paste the following code, 
 # 1b. Alternatively, you can load via `Rscript` terminal command.
 # 2. Part 1 of the script is to be run locally. Resulting objects are to be uploaded onto Cluster
 ##############################################################################################
@@ -59,10 +59,15 @@
 ## The actual part of data vis is computationally intensive.
 ## Cluster computing may give you more memory usage...and off-line computation.
 ## Place your R object and this R script in the same Cluster directory
-## Rscript Epigenomic-DataVis-on-Cluster.R
+## `Rscript Epigenomic-DataVis-on-Cluster.R`
 
-# source("https://bioconductor.org/biocLite.R")
-# biocLite("genomation")
+for(x in c("genomation","GenomicRanges")){
+  if(! x %in% installed.packages()){
+    source("https://bioconductor.org/biocLite.R")
+    biocLite(as.character(x))
+  }
+} 
+
 library(genomation)
 library(GenomicRanges)
 load("my-R-objects-for-genomation.RData")
