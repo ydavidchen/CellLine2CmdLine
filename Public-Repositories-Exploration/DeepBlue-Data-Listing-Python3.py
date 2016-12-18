@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[2]:
-
 ################################################################################
 ## Query Epigenetic Marks
 ## Adapted from DeepBlue API Examples
@@ -40,9 +35,7 @@ server.list_projects(user_key)
 
 
 # In[15]:
-
 help(server.list_experiments)
-
 
 # In[5]:
 
@@ -71,9 +64,4 @@ len(signal_experiments)
 ## Query 3: List all experiments with RRBS data
 (status, signal_experiments) = server.list_experiments("", "", "", "", "", "", ["ENCODE", "Blueprint Epigenome"], user_key)
 len(signal_experiments)
-
-
-# In[ ]:
-
-
 

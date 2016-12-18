@@ -1,30 +1,34 @@
-# Resources for analyzing and visualizing bench experiments in the informatics space
+# Resources for analyzing and visualizing biomedical data
 
 ## Overview:
 
-Welcome! This repository is intended for storing code and providing external resources for analyzing/visualizing experimental data in biomedical sciences. For example:
+Welcome! This repository is intended for storing code and providing external resources for analyzing/visualizing experimental data in biomedical sciences.
 
-* Visualizing pyrosequencing data in R
+**Examples of working with laboratory bench-top data:**
+
+* Visualizing pyrosequencing data using `ggplot2` in R
 * Reading and visualizing DNA fragment data files (instrument) into R
-* Genomic data visualization in R with example data sets
+* Cleaning up and visualizing enzyme-linked immunosorbent assay (ELISA) data in R
+* Calculation of concentrations, volumes, etc. for mass-specrometry proteomics experiments (a reproducible framework alternative to using spreadsheet)
 
-We aim to provide resources to better translate bench-top data into the computational realm. We try to bridge the gaps in tools that are currently lacking or requires improvement.
+**Example of working with big data:**
 
-Please note relevant references, which may include the names of software packages used/dependent upon and journal articles reporting the software. We thank authors and developers who distributed their software packages.
+* Accessing large-scale (epi)genomics data from
+* Genome-scale data visualization using `genomation` R/Bioconductor package
+* Single/several-gene-level data visualization using `Gviz` R/Bioconductor package
 
-While the main programming language is R, tools based in other languages such as Unix/Linux, python, matlab, and C may be included in the future. Tutorials may be written in R Markdown (.rmd) or LaTex (.tex).
+While the main programming language is R, tools based in other languages such as Unix/Linux, python, and C may be included in the future. Tutorials may also be written in R Markdown (.rmd) or LaTex (.tex).
 
-## General R software packages for analyzing bench experiments:
+## General software packages for analyzing laboratory experiments:
 
-* Analysis of flow-cytometry data using the [`flowCore` R/Bioconductor pakcage] (https://bioconductor.org/packages/release/bioc/html/flowCore.html)
-* Analysis of quantitative polymerase chain reaction (qPCR) in R: [`qpcR`] (https://cran.r-project.org/web/packages/qpcR/index.html), [`HTqPCR`] (https://www.bioconductor.org/packages/release/bioc/html/HTqPCR.html), [`EasyqPCR`] (https://www.bioconductor.org/packages/release/bioc/html/EasyqpcR.html)
-* Analysis of [dose response curve in R] (https://cran.r-project.org/web/packages/drc/index.html)
+* Flow cytometry: [`flowCore`] (https://bioconductor.org/packages/release/bioc/html/flowCore.html), [`flowWorkspace`] (http://www.bioconductor.org/packages/release/bioc/html/flowWorkspace.html), [`ggcyto` (`ggplot2`-based)] (https://bioconductor.riken.jp/packages/3.4/bioc/html/ggcyto.html)
+* Quantitative polymerase chain reaction (qPCR) in R: [`qpcR`] (https://cran.r-project.org/web/packages/qpcR/index.html), [`HTqPCR`] (https://www.bioconductor.org/packages/release/bioc/html/HTqPCR.html), [`EasyqPCR`] (https://www.bioconductor.org/packages/release/bioc/html/EasyqpcR.html)
+* Dose response curve in R [`DRC`] (https://cran.r-project.org/web/packages/drc/index.html)
 
 ## Useful bioinformatics tools:
 
-* [PAM50 gene list and sample R code by J.S. Parker et al. (J Clin. Oncol. 2009; .zip folder)] (https://genome.unc.edu/pubsup/breastGEO/PAM50.zip)
-* [SWITCHdna R functions and sample dataset by Weigman V.J. et al. (Breast Cancer Res. Treat. 2011)] (https://genome.unc.edu/pubsup/SWITCHdna/)
-* [Estimation of STromal and Immune cells in MAlignant Tumours using Expression data (ESTIMATE), Yoshihara et al. 2013 Nature Comm.]  (http://bioinformatics.mdanderson.org/main/ESTIMATE:Overview)
+* [PAM50 gene list and sample R code] (https://genome.unc.edu/pubsup/breastGEO/PAM50.zip) (Parker et al. J Clin. Oncol. 2009; `zip` folder)
+* [Estimation of STromal and Immune cells in MAlignant Tumours using Expression data (ESTIMATE)]  (http://bioinformatics.mdanderson.org/main/ESTIMATE:Overview) (Yoshihara et al. Nature Comm. 2013)
 
 ## Other resources:
 
@@ -33,5 +37,4 @@ While the main programming language is R, tools based in other languages such as
 
 ## Coming soon:
 
-* Genomic data visualization using the `Gviz` and `genomation` R/Bioconductor packages
-* Reproducible preparation of multiplex ligation-dependent probe amplification training data set in R (original tutorial was in Excel)
+* Reproducible preparation of multiplex ligation-dependent probe amplification training data set in R (translating instructions for spreadsheet users into R)
