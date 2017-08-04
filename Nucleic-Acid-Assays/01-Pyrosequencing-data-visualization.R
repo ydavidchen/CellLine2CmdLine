@@ -42,7 +42,9 @@ ggplot(data=GENE.summary, aes(x=as.factor(ID), y=mean)) +
   
   ## add text above bars:
   geom_text(data=GENE.summary,aes(label=round(mean,2)), vjust=-2.5) + ##vjust: farther AWAY from the error bar
+
+  ## theme
+  theme_bw() +
   
   ## configure theme layer:
-  theme(axis.text=element_text(size=12), axis.title=element_text(size=15,face="bold")) +  
-  theme_bw()
+  theme(axis.text=element_text(size=12), axis.title=element_text(size=15,face="bold"))
