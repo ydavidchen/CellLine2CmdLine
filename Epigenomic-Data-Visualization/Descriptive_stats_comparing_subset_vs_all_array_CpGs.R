@@ -1,8 +1,11 @@
-####################################################################################
+###################################################################################################
 # Descriptive stats: compare all EPIC array vs. most variable k CpGs
 # Script author: David Chen
 # Date: 11/22/2017
-####################################################################################
+# Notes:
+# 1. The main objective of this cript is to generate "Plot 1" below.
+# 2. "Enhancer" is broadly defined: either FANTOM4/5 or previously known on 450K array.
+###################################################################################################
 
 rm(list=ls())
 
@@ -51,24 +54,28 @@ arrayDescripStats <- merge(
   data.frame(table(ann850KSub$Relation_to_Island) / nrow(ann850KSub)), #subset of 850K probes
   by = "Var1",
   stringsAsFactors = FALSE
-)
-colnames(arrayDescripStats) <- c("Category","all850K","mostVariable") #update as necessary; order matters
-arrayDescripStats$Category <- as.character(arrayDescripStats$Category) 
+); 
+colnames(arrayDescripStats) <- c("Category","all850K","mostVariable"); #update as necessary; order matters
+arrayDescripStats$Category <- as.character(arrayDescripStats$Category); 
 arrayDescripStats <- rbind(
   arrayDescripStats,
-  c(Category="TSS1500",  all850K=mean(grepl("TSS1500",annot.850kb3$UCSC_RefGene_Group)),  mostVariable=mean(grepl("TSS1500",ann850KSub$UCSC_RefGene_Group))),
-  c(Category="TSS200",   all850K=mean(grepl("TSS200", annot.850kb3$UCSC_RefGene_Group)) , mostVariable=mean(grepl("TSS200", ann850KSub$UCSC_RefGene_Group)) ),
-  c(Category="TSS (any)",all850K=mean(grepl("TSS",    annot.850kb3$UCSC_RefGene_Group)) , mostVariable=mean(grepl("TSS",    ann850KSub$UCSC_RefGene_Group)) ),
-  c(Category="Gene body",all850K=mean(grepl("Body",   annot.850kb3$UCSC_RefGene_Group)) , mostVariable=mean(grepl("Body",   ann850KSub$UCSC_RefGene_Group)) ),
-  c(Category="UTR",      all850K=mean(grepl("UTR",   annot.850kb3$UCSC_RefGene_Group)) , mostVariable=mean(grepl("UTR",     ann850KSub$UCSC_RefGene_Group)) ),
-  c(Category="Enhancer", all850K=mean(annot.850kb3$Phantom5_Enhancers != "") , mostVariable=mean(ann850KSub$Phantom5_Enhancers != "") )
-) 
-arrayDescripStats$all850K <- as.numeric(arrayDescripStats$all850K)
-arrayDescripStats$mostVariable <- as.numeric(arrayDescripStats$mostVariable) 
+  c(Category="TSS1500", all850K=mean(grepl("TSS1500",annot.850kb3$UCSC_RefGene_Group)),  mostVariable=mean(grepl("TSS1500",ann850KSub$UCSC_RefGene_Group))),
+  c(Category="TSS200", all850K=mean(grepl("TSS200", annot.850kb3$UCSC_RefGene_Group)), mostVariable=mean(grepl("TSS200",ann850KSub$UCSC_RefGene_Group)) ),
+  c(Category="TSS (any)",all850K=mean(grepl("TSS", annot.850kb3$UCSC_RefGene_Group)), mostVariable=mean(grepl("TSS",ann850KSub$UCSC_RefGene_Group)) ),
+  c(Category="Gene body",all850K=mean(grepl("Body", annot.850kb3$UCSC_RefGene_Group)), mostVariable=mean(grepl("Body",ann850KSub$UCSC_RefGene_Group)) ),
+  c(Category="UTR", all850K=mean(grepl("UTR", annot.850kb3$UCSC_RefGene_Group)), mostVariable=mean(grepl("UTR",ann850KSub$UCSC_RefGene_Group)) ),
+  c(Category="Enhancer", all850K=mean(annot.850kb3$Phantom4_Enhancers != "" | annot.850kb3$Phantom5_Enhancers != "" | annot.850kb3$X450k_Enhancer == "TRUE") , mostVariable=mean(ann850KSub$Phantom4_Enhancers != "" | ann850KSub$Phantom5_Enhancers != "" | ann850KSub$X450k_Enhancer =="TRUE") ),
+  c(Category="DNase", all850K=mean(annot.850kb3$DNase_Hypersensitivity_NAME != ""), mostVariable=mean(ann850KSub$DNase_Hypersensitivity_NAME != "") )
+);
+arrayDescripStats$all850K <- as.numeric(arrayDescripStats$all850K); 
+arrayDescripStats$mostVariable <- as.numeric(arrayDescripStats$mostVariable); 
+
+## Export summary table: 
+write.csv(arrayDescripStats, file="Descriptive stats of all vs selected CpGs.csv", row.names=F, quote=F)
 
 ## Data visualization:
-plt.descStats <- melt(arrayDescripStats, id.vars="Category", variable.name="CpGs", value.name="Proportion")
-plt.descStats$Category <- factor(plt.descStats$Category, levels=c("TSS200","TSS1500","TSS (any)","Enhancer","Gene body","UTR","Island","N_Shelf","S_Shelf","N_Shore","S_Shore","OpenSea"))
+plt.descStats <- melt(arrayDescripStats, id.vars="Category", variable.name="CpGs", value.name="Proportion"); 
+plt.descStats$Category <- factor(plt.descStats$Category, levels=c("TSS200","TSS1500","TSS (any)","Gene body","UTR","Enhancer","DNase","Island","N_Shelf","S_Shelf","N_Shore","S_Shore","OpenSea"))
 ggplot(plt.descStats, aes(Category, Proportion, fill=CpGs)) +
   geom_bar(stat="identity", position="dodge") +
   labs(x="", title=paste("Var(beta-value) threshold:",varCut) ) +
@@ -77,12 +84,9 @@ ggplot(plt.descStats, aes(Category, Proportion, fill=CpGs)) +
   theme_classic() +
   theme(axis.text.x=element_text(size=14,color="black"), axis.text.y=element_text(size=14,color="black"),
         legend.position="top", legend.title=element_blank(), legend.text=element_text(size=14,color="black")) +
-  geom_vline(xintercept=6.5, linetype="dashed")
+  geom_vline(xintercept=7.5, linetype="dashed")
 
-## Can also export table: 
-write.csv(arrayDescripStats, file="Descriptive stats of all vs selected CpGs.csv", row.names=F, quote=F)
-
-#----------------------------------------Plot 2: Unique gene counts----------------------------------------
+#----------------------------------------Plot 2: Unique gene counts using Venn Diagram----------------------------------------
 genes.sele <- as.character(ann850KSub$UCSC_RefGene_Name)
 genes.sele <- paste(genes.sele,collapse=";")
 genes.sele <- strsplit(genes.sele, split=";")[[1]]
