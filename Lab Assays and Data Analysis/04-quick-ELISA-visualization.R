@@ -10,7 +10,7 @@
 ####################################################################
 
 ## Load raw instrument data (.txt) from SoftMaxPro illuminescent plate reader:
-myELISA <- read.csv("01-example-ELISA-instrument-data.txt", sep="\t", skip=3, header=FALSE)
+myELISA <- read.csv("04-example-ELISA-instrument-data.txt", sep="\t", skip=3, header=FALSE)
 View(myELISA) #check
 
 ## Clean up your ELISA data.frame
